@@ -8,12 +8,16 @@ feature_names = model_data['feature_names']
 encoders = pickle.load(open('encoders.pkl','rb'))
 
 st.title("Customer Churn Prediction")
+st.markdown("Predict whether a customer is likely to churn based on key features.")
 
 gender = st.selectbox("Gender", ["Male","Female"])
 tenure = st.slider("Tenure (in months)", 0, 72)
 monthly = st.number_input("Monthly Charges")
 
 if st.button("Predict"):
+    if monthly == 0:
+        st.warning("⚠️ Monthly charges are usually greater than 0. Prediction may be unreliable.")
+
     input_data = {
         "gender": gender,
         "SeniorCitizen": 0,
@@ -44,8 +48,11 @@ if st.button("Predict"):
     df = df[feature_names]
 
     pred = model.predict(df)
+    prob = model.predict_proba(df)[0][1]
+
+    st.write(f"Churn Probability: {prob*100:.1f}%")
 
     if pred[0] == 1:
-        st.error("High Churn Risk: Customer likely to leave")
+        st.error("High Churn Risk: Customer is likely to leave")
     else:
-        st.success("Low Churn Risk: Customer likely to stay")
+        st.success("Low Churn Risk: Customer is likely to stay")
